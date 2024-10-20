@@ -1,0 +1,97 @@
+# depslib dependency file v1.0
+1726647958 source:d:\git\ftp_client_do_an_ltm\ftp_client\cli.cpp
+	<iostream>
+	<sstream>
+	"cli.h"
+
+1726647958 d:\git\ftp_client_do_an_ltm\ftp_client\cli.h
+	<string>
+
+1729396389 source:d:\git\ftp_client_do_an_ltm\ftp_client\main.cpp
+	<iostream>
+	"FTP_client_cli.h"
+
+1726647958 source:d:\git\ftp_client_do_an_ltm\ftp_client\socket.cpp
+	"socket.h"
+	<winsock2.h>
+	<ws2tcpip.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<arpa/inet.h>
+	<unistd.h>
+	<netinet/in.h>
+	<cstring>
+	<errno.h>
+
+1726647958 d:\git\ftp_client_do_an_ltm\ftp_client\socket.h
+	<string>
+	<exception>
+
+1726647958 source:d:\git\ftp_client_do_an_ltm\ftp_client\tcpclient.cpp
+	"tcpclient.h"
+	<iostream>
+	<fstream>
+
+1726647958 d:\git\ftp_client_do_an_ltm\ftp_client\tcpclient.h
+	"tcpsocket.h"
+
+1726647958 d:\git\ftp_client_do_an_ltm\ftp_client\tcpsocket.h
+	"socket.h"
+
+1726647958 source:d:\git\ftp_client_do_an_ltm\ftp_client\tcpsocket.cpp
+	<winsock2.h>
+	<ws2tcpip.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<arpa/inet.h>
+	<unistd.h>
+	<netinet/in.h>
+	<cstring>
+	<errno.h>
+	"tcpsocket.h"
+
+1729390071 source:d:\git\ftp_client_do_an_ltm\ftp_client\ftpclient_cli.cpp
+	"ftpClient_CLI.h"
+	<iostream>
+	<cstdlib>
+
+1729356159 source:d:\git\ftp_client_do_an_ltm\ftp_client\ftp_tcpclient.cpp
+	"ftp_TCPClient.h"
+	<iostream>
+	<cerrno>
+	<cstring>
+	<cstdio>
+
+1729355693 d:\git\ftp_client_do_an_ltm\ftp_client\ftp_tcpclient.h
+	"tcpclient.h"
+	<iostream>
+
+1729389508 d:\git\ftp_client_do_an_ltm\ftp_client\ftpclient_cli.h
+	"cli.h"
+	"ftp_TCPClient.h"
+	<iostream>
+
+1729397523 source:d:\git\ftp_client_do_an_ltm\ftp_client\ftp_client_cli.cpp
+	"FTP_client_cli.h"
+	<iostream>
+	<cstdlib>
+	<string>
+
+1729393594 d:\git\ftp_client_do_an_ltm\ftp_client\ftp_client_cli.h
+	"cli.h"
+	"FTP_Tcp_client.h"
+	<iostream>
+
+1729393483 d:\git\ftp_client_do_an_ltm\ftp_client\ftp_tcp_client.h
+	"tcpclient.h"
+	<iostream>
+
+1729397940 source:d:\git\ftp_client_do_an_ltm\ftp_client\ftp_tcp_client.cpp
+	"FTP_Tcp_client.h"
+	<iostream>
+	<cerrno>
+	<cstring>
+	<cstdio>
+

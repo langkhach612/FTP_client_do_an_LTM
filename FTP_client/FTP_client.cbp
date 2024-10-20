@@ -35,6 +35,10 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="FTP_Tcp_client.cpp" />
+		<Unit filename="FTP_Tcp_client.h" />
+		<Unit filename="FTP_client_cli.cpp" />
+		<Unit filename="FTP_client_cli.h" />
 		<Unit filename="cli.cpp" />
 		<Unit filename="cli.h" />
 		<Unit filename="main.cpp" />
