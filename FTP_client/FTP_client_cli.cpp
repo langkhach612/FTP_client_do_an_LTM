@@ -18,6 +18,14 @@ FTP_cli::FTP_cli():CmdLineInterface("FTP> "){
         cout<<"enter password: ";getline(cin, password);
         if(client.password(password)){
             cout<<"login success"<<endl;
+            cout<<"USER <username> + PASS <password> \n"
+                <<"print current path: PWD <enter>\n"
+                <<"change directory: CWD <fol_name>\n"
+                <<"print file list of dir: LIST <enter>\n"
+                <<"download file: DOWNLOAD <filename>\n"
+                <<"upload file: UPLOAD <filename>\n"
+                <<"rename file: rename <oldname> <newname>\n"<<endl;
+
         }
         else{
             cout<<"login failed"<<endl;
@@ -39,8 +47,10 @@ void FTP_cli::initCmd(){
     addCmd("CWD",CLI_CAST(&FTP_cli::CWD));
     addCmd("PWD",CLI_CAST(&FTP_cli::PWD));
     addCmd("LIST",CLI_CAST(&FTP_cli::LIST));
-    addCmd("UPlOAD",CLI_CAST(&FTP_cli::upload));
+    addCmd("rename",CLI_CAST(&FTP_cli::renamefile));
+    addCmd("UPLOAD",CLI_CAST(&FTP_cli::upload));
     addCmd("DOWNLOAD",CLI_CAST(&FTP_cli::download));
+    addCmd("help",CLI_CAST(&FTP_cli::Help));
 }
 
 void FTP_cli::User(string cmd_argv[], int cmd_argc){
@@ -62,6 +72,9 @@ void FTP_cli::Pass(string cmd_argv[], int cmd_argc){
         else{
             cout<<"login failed"<<endl;
         }
+    }
+    else{
+        cout<<"UPLOAD <filename>"<<endl;
     }
 
 }
@@ -99,14 +112,52 @@ void FTP_cli::LIST(string cmd_argv[], int cmd_argc){
 }
 
 void FTP_cli::renamefile(string cmd_argv[], int cmd_argc){
-
+    if(cmd_argc == 3){
+        if(client.Rename_file(cmd_argv[1], cmd_argv[2])){
+            cout<<"rename file success"<<endl;
+        }
+        else{
+            cout<<"rename file failse"<<endl;
+        }
+    }
+    else{
+        cout<<"rename <oldname> <newname>"<<endl;
+    }
 }
 
 
 void FTP_cli::upload(string cmd_argv[], int cmd_argc){
-
+    if(cmd_argc == 2){
+        if(client.upload(cmd_argv[1])){
+            cout<<"ok-upload success"<<endl;
+        }
+        else{
+            cout<<"upload failed"<<endl;
+        }
+    }
 }
 
 void FTP_cli::download(string cmd_argv[], int cmd_argc){
+    if(cmd_argc == 2){
+        if(client.download(cmd_argv[1])){
+            cout<<"ok-download success!"<<endl;
+        }
+        else{
+            cout<<"download file unsucess"<<endl;
+        }
+    }
+    else{
+        cout<<"download <filename>"<<endl;
+    }
 
+}
+
+void FTP_cli::Help(string cmd_argv[],int cmd_argc){
+    cout<<"USER <username> + PASS <password> \n"
+        <<"print current path: PWD <enter>\n"
+        <<"change directory: CWD <fol_name>\n"
+        <<"print file list of dir: LIST <enter>\n"
+        <<"download file: DOWNLOAD <filename>\n"
+        <<"upload file: UPLOAD <filename>\n"
+        <<"rename file: rename <oldname> <newname>\n"<<endl;
 }

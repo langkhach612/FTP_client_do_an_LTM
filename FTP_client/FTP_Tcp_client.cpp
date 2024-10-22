@@ -4,6 +4,8 @@
 #include<cerrno>
 #include<cstring>
 #include<cstdio>
+#include<utility>
+#include<fstream>
 
 using namespace std ;
 
@@ -183,4 +185,133 @@ bool ftpTcpClient::CWD(const string& filename){
     }
 }
 
+bool ftpTcpClient::Rename_file(const string& oldname, const string& newname){
+    char buffer[1024];
+    localsocket.send("RNFR " + oldname + "\r\n");
+    int byte_recv = localsocket.recvLine(buffer, 1024);
+    cout<<string(buffer,byte_recv)<<endl;
+    string rescode = string(buffer,3);
+    if(rescode == "350"){
+        localsocket.send("RNTO " + newname + "\r\n");
+        byte_recv = localsocket.recvLine(buffer,1024);
+        rescode = string(buffer,3);
+        if(rescode == "250"){
+            cout<<string(buffer,byte_recv)<<endl;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ftpTcpClient::download(const string& filename){
+    pair<string,int> link_data = this->PASV();
+    if(link_data.second != 0){
+        char buffer[1024];
+        localsocket.send("RETR " +filename + "\r\n");
+        int byte_recv = localsocket.recv(buffer,1024);
+        string rescode = string(buffer,3);
+        if(rescode == "150"){
+            TcpSocket data_recv;
+            data_recv.connect(link_data.first, link_data.second);
+
+            ofstream outfile(filename,ios::binary);
+            char buffer_data[1024];
+
+            byte_recv = data_recv.recv(buffer_data,sizeof(buffer_data));
+            if(byte_recv <= 0){
+                cout<<"couldn't download file"<<endl;
+                return false;
+            }
+            while(byte_recv > 0){
+                outfile.write(buffer_data,byte_recv);
+                byte_recv = data_recv.recv(buffer_data,sizeof(buffer_data));
+            }
+
+            outfile.close();
+            data_recv.close();
+
+            byte_recv = localsocket.recv(buffer,1024);
+            rescode = string(buffer,byte_recv);
+            cout<<rescode<<endl;
+            return true;
+        }
+        cout<<string(buffer, byte_recv)<<endl;
+        return false;
+    }
+    cout<<"failed to passive mode"<<endl;
+    return false;
+}
+
+bool ftpTcpClient::upload(const string& filename){
+    pair<string,int> link_data = this->PASV();
+    if(link_data.second != 0){
+        char buffer[1024];
+        localsocket.send("STOR " + filename + "\r\n");
+        int byte_recv = localsocket.recv(buffer, 1024);
+        string rescode = string(buffer,3);
+        if(rescode == "150"){
+            TcpSocket data_recv;
+            data_recv.connect(link_data.first,link_data.second);
+
+            char buffer_data[1024];
+            ifstream infile(filename,ios::binary);
+            if(!infile.is_open()){
+                cout<<"failed to open file"<<endl;
+                return false;
+            }
+
+            while(!infile.eof()){
+                infile.read(buffer_data, 1024);
+                int byte_write = infile.gcount();
+                data_recv.send(buffer_data, byte_write);
+            }
+
+            infile.close();
+
+            data_recv.close();
+
+            byte_recv = localsocket.recv(buffer,1024);
+            cout<<string(buffer,byte_recv)<<endl;
+
+            return true;
+
+        }
+        cout<<string(buffer,byte_recv)<<endl;
+        return false;
+    }
+    cout<<"failed to passive mode"<<endl;
+    return false;
+
+}
+
+pair<string,int> ftpTcpClient::PASV(){
+    char buffer[1024];
+
+    // configure passivemode
+    localsocket.send("PASV\r\n");
+    localsocket.recvLine(buffer, 1024);
+    string rescode = string(buffer, 3);
+    if (rescode != "227") {
+        cout<<"fail rescode"<<endl;
+        return {" ",0};
+    }
+
+    string pasvRespone(buffer);
+    size_t start = pasvRespone.find('(');
+    size_t end = pasvRespone.find(')');
+    if (start == string::npos || end == string::npos) {
+        cout<<"fail find result"<<endl;
+        return {" ",0};
+    }
+
+    string pasvData = pasvRespone.substr(start + 1, end - start - 1);
+    int ip1, ip2, ip3, ip4, port1, port2;
+    sscanf(pasvData.c_str(), "%d,%d,%d,%d,%d,%d", &ip1, &ip2, &ip3, &ip4, &port1, &port2);
+
+    string ip = to_string(ip1) + "." + to_string(ip2) + "." + to_string(ip3) + "." + to_string(ip4);
+    int port = port1 * 256 + port2;
+    cout<<"passive mode chanel: "<<ip<<" "<<port<<endl;
+    pair<string,int> result = {ip,port};
+    return result;
+}
 

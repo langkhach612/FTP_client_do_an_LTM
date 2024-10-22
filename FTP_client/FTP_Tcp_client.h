@@ -1,6 +1,7 @@
 #include "tcpclient.h"
 
 #include<iostream>
+#include<utility>
 
 using namespace std;
 
@@ -14,6 +15,7 @@ public:
     bool User(const string& username);
     bool password(const string& password);
     //bool send_TLS();
+    pair<string,int> PASV();
     string LIST();
     bool CWD(const string& filename);
     string PWD();
