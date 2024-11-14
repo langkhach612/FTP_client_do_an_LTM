@@ -22,5 +22,6 @@ public:
     bool Rename_file(const string& oldname, const string& newname);
     bool download(const string& filename);
     bool upload(const string& filename);
+    void close_Connect();
 };
 
