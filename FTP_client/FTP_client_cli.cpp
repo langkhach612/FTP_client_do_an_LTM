@@ -87,7 +87,7 @@ void FTP_cli::Pass(string cmd_argv[], int cmd_argc){
 }
 
 void FTP_cli::CWD(string cmd_argv[], int cmd_argc){
-    if(cmd_argc == 2 && client.check_Connect("localhost",21)){
+    if(cmd_argc == 2){
         if(client.CWD(cmd_argv[1])){
             cout<<"success change dir"<<endl;
         }
@@ -146,6 +146,7 @@ void FTP_cli::upload(string cmd_argv[], int cmd_argc){
         }
         else{
             cout<<"upload failed"<<endl;
+            cout<<"created "<<filename<<endl;
         }
     }
     else{

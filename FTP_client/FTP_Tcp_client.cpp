@@ -46,12 +46,46 @@ bool ftpTcpClient::check_Connect(const string& ip, unsigned short port){
 //    return false;
 //}
 
+string ftpTcpClient::recvfulrespond(TcpSocket &localsocket){
+    string fullResponse;
+    char buffer[1024];
+    bool isMultiLine = false;
+    string endCode;
+
+    while (true) {
+        // nhan tung dong respond
+        int bytesReceived = localsocket.recvLine(buffer,sizeof(buffer));
+        if (bytesReceived <= 0) {
+            break; //ngung nhan neu ko con data
+        }
+
+        string line(buffer, bytesReceived);
+        fullResponse += line; // Ghi lai phan hoi
+
+        // kiem tra ma trang thai
+        if (!isMultiLine && line.length() >= 4 && line[3] == '-') {
+            // phan hoi nhieu dong
+            isMultiLine = true;
+            endCode = line.substr(0, 3); // luu ma trang thai
+        } else if (isMultiLine && line.substr(0, 3) == endCode && line[3] != '-') {
+            // dong ket thuc phan hoi
+            break;
+        } else if (!isMultiLine) {
+            // Khong phai phan hoi nhieu dong
+            break;
+        }
+    }
+
+    return fullResponse;
+}
+
+
 bool ftpTcpClient::User(const string& user){
     localsocket.send("USER " + user + "\r\n");
     char buffer[128];
     int byte_recv = localsocket.recv(buffer, 128);
-    cout<<string(buffer,byte_recv)<<endl;
-    if(byte_recv>0 && buffer[0]=='3')
+    cout<<string(buffer, byte_recv)<<endl;
+    if(byte_recv > 0 && buffer[0]=='3')
     {
         return true;
     }
@@ -60,14 +94,22 @@ bool ftpTcpClient::User(const string& user){
 
 bool ftpTcpClient::password(const string& pass){
     localsocket.send("PASS " + pass + "\r\n");
-    char buffer[128];
-    int byte_recv = localsocket.recv(buffer, 128);
-    string rescode = string(buffer,3);
-    cout<<string(buffer,byte_recv)<<endl;
-    if(byte_recv>0 && rescode == "230")
-    {
+//    char buffer[128];
+//    int byte_recv = localsocket.recv(buffer, 128);
+//    string rescode = string(buffer,3);
+//    if(byte_recv>0 && rescode == "230")
+//    {
+//        cout<<string(buffer,byte_recv)<<endl;
+//        return true;
+//    }
+
+    string rescode = this->recvfulrespond(localsocket);
+
+    if(rescode.substr(0,3) == "230"){
+        cout<<rescode<<endl;
         return true;
     }
+    cout<<rescode<<endl;
     return false;
 }
 
@@ -153,38 +195,39 @@ bool ftpTcpClient::CWD(const string& filename){
 }
 
 bool ftpTcpClient::Rename_file(const string& oldname, const string& newname){
-    char buffer[1024];
+//    char buffer[1024];
     localsocket.send("RNFR " + oldname + "\r\n");
-    int byte_recv = localsocket.recvLine(buffer, 1024);
-    cout<<string(buffer,byte_recv)<<endl;
-    string rescode = string(buffer,3);
-    if(rescode == "350"){
+//    int byte_recv = localsocket.recvLine(buffer, 1024);
+//    cout<<string(buffer,byte_recv)<<endl;
+//    string rescode = string(buffer,3);
+    string rescode = this->recvfulrespond(localsocket);
+    if(rescode.substr(0,3) == "350"){
         localsocket.send("RNTO " + newname + "\r\n");
-        byte_recv = localsocket.recvLine(buffer,1024);
-        rescode = string(buffer,3);
-        if(rescode == "250"){
-            cout<<string(buffer,byte_recv)<<endl;
+        rescode = this->recvfulrespond(localsocket);
+        if(rescode.substr(0,3) == "250"){
+            cout<<rescode<<endl;
             return true;
         }
     }
+    cout<<rescode<<endl;
     return false;
 }
 
 bool ftpTcpClient::download(const string& filename){
     pair<string,int> link_data = this->PASV();
     if(link_data.second != 0){
-        char buffer[1024];
+//        char buffer[1024];
         localsocket.send("RETR " +filename + "\r\n");
-        int byte_recv = localsocket.recv(buffer,1024);
-        string rescode = string(buffer,3);
-        if(rescode == "150"){
+//        int byte_recv = localsocket.recv(buffer,1024);
+        string rescode = this->recvfulrespond(localsocket);
+        if(rescode.substr(0,3) == "150"){
             TcpSocket data_recv;
             data_recv.connect(link_data.first, link_data.second);
 
             ofstream outfile(filename,ios::binary);
             char buffer_data[1024];
 
-            byte_recv = data_recv.recv(buffer_data,1024);
+            int byte_recv = data_recv.recv(buffer_data,1024);
             if(byte_recv <= 0){
                 cout<<"couldn't download file"<<endl;
                 return false;
@@ -197,12 +240,12 @@ bool ftpTcpClient::download(const string& filename){
             outfile.close();
             data_recv.close();
 
-            byte_recv = localsocket.recv(buffer,1024);
-            rescode = string(buffer,byte_recv);
+//            byte_recv = localsocket.recv(buffer,1024);
+            rescode = this->recvfulrespond(localsocket);
             cout<<rescode<<endl;
             return true;
         }
-        cout<<string(buffer, byte_recv)<<endl;
+        cout<<rescode<<endl;
         return false;
     }
     cout<<"failed to passive mode"<<endl;
@@ -212,11 +255,11 @@ bool ftpTcpClient::download(const string& filename){
 bool ftpTcpClient::upload(const string& filename){
     pair<string,int> link_data = this->PASV();
     if(link_data.second != 0){
-        char buffer[1024];
+//        char buffer[1024];
         localsocket.send("STOR " + filename + "\r\n");
-        int byte_recv = localsocket.recv(buffer, 1024);
-        string rescode = string(buffer,3);
-        if(rescode == "150"){
+//        int byte_recv = localsocket.recv(buffer, 1024);
+        string rescode = this->recvfulrespond(localsocket);
+        if(rescode.substr(0,3) == "150"){
             TcpSocket data_recv;
             data_recv.connect(link_data.first,link_data.second);
 
@@ -224,6 +267,8 @@ bool ftpTcpClient::upload(const string& filename){
             ifstream infile(filename,ios::binary);
             if(!infile.is_open()){
                 cout<<"failed to open file"<<endl;
+                data_recv.close();
+                cout<<this->recvfulrespond(localsocket);
                 return false;
             }
 
@@ -237,13 +282,13 @@ bool ftpTcpClient::upload(const string& filename){
 
             data_recv.close();
 
-            byte_recv = localsocket.recv(buffer,1024);
-            cout<<string(buffer,byte_recv)<<endl;
+            rescode = this->recvfulrespond(localsocket);
+            cout<<rescode<<endl;
 
             return true;
 
         }
-        cout<<string(buffer,byte_recv)<<endl;
+        cout<<rescode<<endl;
         return false;
     }
     cout<<"failed to passive mode"<<endl;

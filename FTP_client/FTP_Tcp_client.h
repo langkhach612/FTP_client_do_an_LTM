@@ -22,6 +22,7 @@ public:
     bool Rename_file(const string& oldname, const string& newname);
     bool download(const string& filename);
     bool upload(const string& filename);
+    string recvfulrespond(TcpSocket &localsocket);
     void close_Connect();
 };
 
